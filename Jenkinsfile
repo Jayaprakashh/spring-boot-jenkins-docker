@@ -2,8 +2,8 @@
     agent any
 
     tools {
-        maven 'Maven 3.8.2'
-        jdk 'JDK 17'
+        maven 'Maven 3.8.1'   // Jenkins global name
+        jdk 'JDK 17'          // Jenkins global name
     }
 
     environment {
@@ -33,12 +33,12 @@
 
         stage('Push Docker Image') {
             steps {
-                script {
-                    docker.withRegistry('', 'docker-hub-credentials') {
-                        docker.image("${DOCKER_HUB_USERNAME}/${IMAGE_NAME}:${DOCKER_TAG}").push()
-                    }
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-login', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    sh 'echo $PASSWORD | docker login -u $USERNAME --password-stdin'
+                    sh 'docker push $DOCKER_IMAGE'
                 }
             }
+        }
 
         stage('Cleanup') {
             steps {
