@@ -1,15 +1,16 @@
- pipeline {
+  pipeline {
     agent any
 
     tools {
-        maven 'Maven 3.8.2'   // Jenkins global name
-        jdk 'JDK 17'          // Jenkins global name
+        maven 'Maven 3.8.2'   // Matches Jenkins global tool name
+        jdk 'JDK 17'          // Matches Jenkins global JDK name
     }
 
     environment {
         IMAGE_NAME = 'spring-boot-jenkins-docker'
         DOCKER_HUB_USERNAME = 'jayaprakash461'
-        DOCKER_IMAGE = "${DOCKER_HUB_USERNAME}/${IMAGE_NAME}:latest"
+        DOCKER_TAG = 'latest'
+        DOCKER_IMAGE = "${DOCKER_HUB_USERNAME}/${IMAGE_NAME}:${DOCKER_TAG}"
     }
 
     stages {
@@ -31,14 +32,23 @@
             }
         }
 
-            stage('Push Docker Image') {
+        stage('Push Docker Image') {
             steps {
-                script {
-                    docker.withRegistry('', 'docker-hub-credentials') {
-                        docker.image("${DOCKER_HUB_USERNAME}/${IMAGE_NAME}:${DOCKER_TAG}").push()
-                    }
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-login', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    sh '''
+                        echo "$PASSWORD" | docker login -u "$USERNAME" --password-stdin
+                        docker push $DOCKER_IMAGE
+                        docker logout
+                    '''
                 }
             }
         }
 
-    } 
+        stage('Cleanup') {
+            steps {
+                sh 'docker rmi $DOCKER_IMAGE || true'
+            }
+        }
+    }
+}
+  
