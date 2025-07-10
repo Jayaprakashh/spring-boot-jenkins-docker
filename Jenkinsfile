@@ -2,7 +2,7 @@
     agent any
 
     tools {
-        maven 'Maven 3.8.1'   // Jenkins global name
+        maven 'Maven 3.8.2'   // Jenkins global name
         jdk 'JDK 17'          // Jenkins global name
     }
 
