@@ -8,53 +8,44 @@ pipeline {
 
     environment {
         IMAGE_NAME = 'spring-boot-jenkins-docker'
-        DOCKER_HUB_USERNAME = 'jayaprakashjp' // ✅ Your DockerHub username
-        DOCKER_IMAGE = "${DOCKER_HUB_USERNAME}/${IMAGE_NAME}"
+        DOCKER_HUB_USERNAME = 'jayaprakash461' // ✅ Your DockerHub username
+        DOCKER_TAG = 'latest'
+      
     }
 
+  stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+  
     stages {
         stage('Clone Repository') {
             steps {
                 git 'https://github.com/jayaprakashjp/spring-boot-jenkins-docker.git' // ✅ Replace with your actual repo URL
             }
         }
-
-        stage('Build with Maven') {
-            steps {
-                sh 'mvn clean package -DskipTests'
-            }
-        }
+     
 
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build("${DOCKER_IMAGE}:latest")
+                    docker.build("${DOCKER_HUB_USERNAME}/${IMAGE_NAME}:${DOCKER_TAG}")
                 }
             }
         }
 
-        stage('Push Docker Image to DockerHub') {
+      stage('Push Docker Image') {
             steps {
-                withDockerRegistry([credentialsId: 'dockerhub-credentials', url: 'https://index.docker.io/v1/']) {
-                    script {
-                        docker.image("${DOCKER_IMAGE}:latest").push()
+                script {
+                    docker.withRegistry('', 'docker-hub-credentials') {
+                        docker.image("${DOCKER_HUB_USERNAME}/${IMAGE_NAME}:${DOCKER_TAG}").push()
                     }
                 }
             }
-        }
 
-        stage('Run Docker Container') {
-            steps {
-                // Stop and remove existing container if already running
-                sh '''
-                docker stop spring-app || true
-                docker rm spring-app || true
-                docker run -d -p 9006:8080 --name spring-app ${DOCKER_IMAGE}:latest
-                '''
-            }
-        }
-    }
-
+         
     post {
         always {
             echo 'Build completed.'
