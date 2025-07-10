@@ -5,7 +5,7 @@ FROM openjdk:17-jdk-slim
 VOLUME /tmp
 
 # Copy the jar file
-COPY target/spring-boot-jenkins-docker-0.0.1-SNAPSHOT.jar app.jar
+COPY target/spring-boot-jenkins-docker-1.0.0.jar app.jar
 
 # Run the jar file
 ENTRYPOINT ["java","-jar","/app.jar"]
