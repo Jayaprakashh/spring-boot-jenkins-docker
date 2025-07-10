@@ -1,32 +1,23 @@
-pipeline {
+ pipeline {
     agent any
 
     tools {
-        maven 'Maven 3.8.2'   // ✅ Must match your Jenkins global Maven name
-        jdk 'JDK 17'          // ✅ Must match your Jenkins global JDK name
+        maven 'Maven 3.8.2'
+        jdk 'JDK 17'
     }
 
     environment {
         IMAGE_NAME = 'spring-boot-jenkins-docker'
-        DOCKER_HUB_USERNAME = 'jayaprakash461' // ✅ Your DockerHub username
+        DOCKER_HUB_USERNAME = 'jayaprakash461'
         DOCKER_TAG = 'latest'
-      
     }
 
-  stages {
+    stages {
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
-  
-    stages {
-        stage('Clone Repository') {
-            steps {
-                git 'https://github.com/jayaprakashjp/spring-boot-jenkins-docker.git' // ✅ Replace with your actual repo URL
-            }
-        }
-     
 
         stage('Build Docker Image') {
             steps {
@@ -36,7 +27,7 @@ pipeline {
             }
         }
 
-      stage('Push Docker Image') {
+        stage('Push Docker Image') {
             steps {
                 script {
                     docker.withRegistry('', 'docker-hub-credentials') {
@@ -44,11 +35,7 @@ pipeline {
                     }
                 }
             }
-
-         
-    post {
-        always {
-            echo 'Build completed.'
         }
     }
 }
+ 
